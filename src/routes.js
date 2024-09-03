@@ -76,4 +76,21 @@ router.get("/pokemon-details", async (req, res) => {
   res.status(200).json({ message: "Data fetched and saved successfully" });
 });
 
+router.get("/pokemon-desc", async (req, res) => {
+  const [rows] = await db.query("SELECT pokemon_id FROM pokemon");
+  for (const row of rows) {
+    const data = await makeRequest(`pokemon-species/${row.pokemon_id}`);
+    const details = {
+      description: data.flavor_text_entries.find(
+        (item) => item.version.name === "firered"
+      ).flavor_text,
+    };
+    await db.query(`UPDATE pokemon SET description = ? WHERE pokemon_id = ?`, [
+      details.description,
+      row.pokemon_id,
+    ]);
+  }
+  res.status(200).json({ message: "Data fetched and saved successfully" });
+});
+
 export default router;
