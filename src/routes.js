@@ -77,13 +77,15 @@ router.get("/pokemon-details", async (req, res) => {
 });
 
 router.get("/pokemon-desc", async (req, res) => {
-  const [rows] = await db.query("SELECT pokemon_id FROM pokemon");
+  const [rows] = await db.query(
+    "SELECT pokemon_id FROM pokemon WHERE description IS NULL"
+  );
   for (const row of rows) {
     const data = await makeRequest(`pokemon-species/${row.pokemon_id}`);
     const details = {
       description: data.flavor_text_entries.find(
-        (item) => item.version.name === "firered"
-      ).flavor_text,
+        (item) => item.language.name === "en"
+      )?.flavor_text,
     };
     await db.query(`UPDATE pokemon SET description = ? WHERE pokemon_id = ?`, [
       details.description,
